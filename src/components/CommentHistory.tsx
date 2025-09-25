@@ -1,6 +1,6 @@
 import React from 'react';
 import { Comment } from '../types';
-import { X, Clock } from 'lucide-react';
+import { X, Clock, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import { drafts } from '../data/drafts';
 
 interface CommentHistoryProps {
@@ -16,17 +16,39 @@ const CommentHistory: React.FC<CommentHistoryProps> = ({ isOpen, onClose, commen
     return drafts.find(d => d.id === draftId)?.title || 'Unknown Draft';
   };
 
+  const getSentimentIcon = (sentiment?: string) => {
+    switch (sentiment) {
+      case 'positive':
+        return <ThumbsUp size={16} className="text-green-600" />;
+      case 'negative':
+        return <ThumbsDown size={16} className="text-red-600" />;
+      default:
+        return <Minus size={16} className="text-gray-600" />;
+    }
+  };
+
+  const getSentimentColor = (sentiment?: string) => {
+    switch (sentiment) {
+      case 'positive':
+        return 'bg-green-50 border-green-200 text-green-800';
+      case 'negative':
+        return 'bg-red-50 border-red-200 text-red-800';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800';
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold flex items-center gap-2">
+      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-blue-900">
             <Clock size={24} />
-            Your Comment History
+            Your Consultation History
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-100 rounded-xl transition-colors"
           >
             <X size={24} />
           </button>
@@ -34,31 +56,33 @@ const CommentHistory: React.FC<CommentHistoryProps> = ({ isOpen, onClose, commen
         
         <div className="flex-1 overflow-y-auto p-6">
           {comments.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">You haven't made any comments yet.</p>
+            <div className="text-center py-12">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock size={32} className="text-blue-600" />
+              </div>
+              <p className="text-blue-600 text-lg font-medium">You haven't participated in any consultations yet.</p>
+            </div>
           ) : (
             <div className="space-y-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="border rounded-lg p-4">
-                  <div className="mb-2">
-                    <h3 className="font-medium text-sm text-blue-600 mb-1">
+                <div key={comment.id} className="bg-blue-50 border border-blue-100 rounded-xl p-4 hover:shadow-md transition-shadow">
+                  <div className="mb-3">
+                    <h3 className="font-bold text-sm text-blue-700 mb-2">
                       {getDraftTitle(comment.draftId)}
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                         {new Date(comment.timestamp).toLocaleString()}
                       </span>
                       {comment.sentiment && (
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          comment.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
-                          comment.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`text-xs px-3 py-1 rounded-full border font-medium flex items-center gap-1 ${getSentimentColor(comment.sentiment)}`}>
+                          {getSentimentIcon(comment.sentiment)}
                           {comment.sentiment}
                         </span>
                       )}
                     </div>
                   </div>
-                  <p className="text-gray-700">{comment.content}</p>
+                  <p className="text-blue-800 leading-relaxed">{comment.content}</p>
                 </div>
               ))}
             </div>

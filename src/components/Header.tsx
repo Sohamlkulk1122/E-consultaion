@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { History, LogOut, Shield } from 'lucide-react';
+import { History, LogOut, Shield, Building2 } from 'lucide-react';
 import AdminLoginModal from './AdminLoginModal';
 
 interface HeaderProps {
@@ -14,55 +14,71 @@ const Header: React.FC<HeaderProps> = ({ onHistoryClick, showUserActions = false
 
   return (
     <>
-      <header className="bg-gradient-to-r from-gray-900 to-black text-white py-6 px-6 shadow-xl border-b-4 border-gray-800">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Government Web Portal</h1>
-            <h2 className="text-xl font-light tracking-wide text-gray-300">E-Consultation</h2>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {!isAdmin && !user && (
-              <button
-                onClick={() => setShowAdminModal(true)}
-                className="flex items-center gap-2 px-6 py-3 border-2 border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Shield size={16} />
-                Admin
-              </button>
-            )}
+      <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white shadow-2xl border-b-4 border-blue-600">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="bg-white p-3 rounded-xl shadow-lg">
+                <Building2 size={32} className="text-blue-900" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-white">
+                  Government of India
+                </h1>
+                <h2 className="text-lg font-medium text-blue-100 tracking-wide">
+                  E-Consultation Portal
+                </h2>
+              </div>
+            </div>
             
-            {showUserActions && user && (
-              <>
+            <div className="flex items-center gap-4">
+              {!isAdmin && !user && (
                 <button
-                  onClick={onHistoryClick}
-                  className="flex items-center gap-2 px-6 py-3 border-2 border-white rounded-lg hover:bg-white hover:text-black transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  onClick={() => setShowAdminModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-blue-900 rounded-xl hover:bg-blue-50 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                  <History size={16} />
-                  History
+                  <Shield size={16} />
+                  Admin Portal
                 </button>
-                
-                <span className="text-lg font-medium">Welcome, {user.name}</span>
-                
+              )}
+              
+              {showUserActions && user && (
+                <>
+                  <button
+                    onClick={onHistoryClick}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-xl hover:bg-blue-600 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <History size={16} />
+                    My Comments
+                  </button>
+                  
+                  <div className="bg-blue-700 px-4 py-2 rounded-xl">
+                    <span className="text-sm font-medium text-blue-100">Welcome,</span>
+                    <span className="text-lg font-bold text-white ml-1">
+                      {user.user_metadata?.name || user.email?.split('@')[0]}
+                    </span>
+                  </div>
+                  
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-blue-900 rounded-xl hover:bg-blue-50 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </>
+              )}
+              
+              {isAdmin && (
                 <button
                   onClick={logout}
-                  className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-blue-900 rounded-xl hover:bg-blue-50 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   <LogOut size={16} />
-                  Sign Out
+                  Admin Logout
                 </button>
-              </>
-            )}
-            
-            {isAdmin && (
-              <button
-                onClick={logout}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <LogOut size={16} />
-                Admin Logout
-              </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </header>

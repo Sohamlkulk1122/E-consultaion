@@ -22,7 +22,7 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
   const wordFrequency = useMemo(() => generateWordFrequency(draftComments.map(c => c.content)), [draftComments]);
   
   const sentimentData = [
-    { name: 'Positive', value: sentimentStats.positive, color: '#22c55e' },
+    { name: 'Positive', value: sentimentStats.positive, color: '#10b981' },
     { name: 'Negative', value: sentimentStats.negative, color: '#ef4444' },
     { name: 'Neutral', value: sentimentStats.neutral, color: '#6b7280' },
   ];
@@ -49,20 +49,20 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold">Analytics - {draft.title}</h2>
+      <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100">
+          <h2 className="text-xl font-bold text-blue-900">Analytics Dashboard - {draft.title}</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-colors font-bold"
             >
               <Download size={16} />
-              Export CSV
+              Export Data
             </button>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-100 rounded-xl transition-colors"
             >
               <X size={24} />
             </button>
@@ -71,43 +71,43 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
         
         <div className="flex-1 overflow-y-auto p-6">
           {draftComments.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No comments available for analysis.</p>
+            <p className="text-blue-600 text-center py-8 text-lg font-medium">No feedback available for analysis.</p>
           ) : (
             <div className="space-y-8">
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg border border-blue-200">
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageCircle size={20} />
-                    <span className="font-bold">Total Comments</span>
+                    <MessageCircle size={20} className="text-blue-600" />
+                    <span className="font-bold text-blue-900">Total Responses</span>
                   </div>
-                  <p className="text-3xl font-black">{draftComments.length}</p>
+                  <p className="text-3xl font-black text-blue-900">{draftComments.length}</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl shadow-lg border border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp size={20} className="text-green-600" />
-                    <span className="font-bold">Positive</span>
+                    <span className="font-bold text-green-900">Positive</span>
                   </div>
-                  <p className="text-3xl font-black text-green-600">{sentimentStats.positive}</p>
+                  <p className="text-3xl font-black text-green-700">{sentimentStats.positive}</p>
                 </div>
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl shadow-lg border border-red-200">
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 size={20} className="text-red-600" />
-                    <span className="font-bold">Negative</span>
+                    <span className="font-bold text-red-900">Negative</span>
                   </div>
-                  <p className="text-3xl font-black text-red-600">{sentimentStats.negative}</p>
+                  <p className="text-3xl font-black text-red-700">{sentimentStats.negative}</p>
                 </div>
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-bold">Neutral</span>
+                    <span className="font-bold text-gray-900">Neutral</span>
                   </div>
-                  <p className="text-3xl font-black">{sentimentStats.neutral}</p>
+                  <p className="text-3xl font-black text-gray-700">{sentimentStats.neutral}</p>
                 </div>
               </div>
 
               {/* Sentiment Analysis Chart */}
-              <div className="bg-white border-2 border-black rounded-xl p-6 shadow-xl">
-                <h3 className="text-xl font-black mb-6 tracking-tight">Sentiment Analysis</h3>
+              <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-black mb-6 tracking-tight text-blue-900">Sentiment Distribution</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -132,8 +132,8 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
               </div>
 
               {/* Word Frequency */}
-              <div className="bg-white border-2 border-black rounded-xl p-6 shadow-xl">
-                <h3 className="text-xl font-black mb-6 tracking-tight">Most Frequent Words</h3>
+              <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-black mb-6 tracking-tight text-blue-900">Most Discussed Topics</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={wordFrequency.slice(0, 10)}>
@@ -141,7 +141,7 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
                       <XAxis dataKey="text" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#000" />
+                      <Bar dataKey="value" fill="#2563eb" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -149,8 +149,8 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 
               {/* Trends Over Time */}
               {trendsData.length > 1 && (
-                <div className="bg-white border-2 border-black rounded-xl p-6 shadow-xl">
-                  <h3 className="text-xl font-black mb-6 tracking-tight">Comments Trend Over Time</h3>
+                <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-xl">
+                  <h3 className="text-xl font-black mb-6 tracking-tight text-blue-900">Engagement Timeline</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={trendsData}>
@@ -158,7 +158,7 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
                         <XAxis dataKey="date" />
                         <YAxis />
                         <Tooltip />
-                        <Line type="monotone" dataKey="comments" stroke="#000" strokeWidth={2} />
+                        <Line type="monotone" dataKey="comments" stroke="#2563eb" strokeWidth={3} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -166,14 +166,14 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
               )}
 
               {/* Word Cloud Display */}
-              <div className="bg-white border-2 border-black rounded-xl p-6 shadow-xl">
-                <h3 className="text-xl font-black mb-6 tracking-tight">Interactive Word Cloud</h3>
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-lg min-h-64 relative overflow-hidden">
-                  <div className="flex flex-wrap justify-center items-center gap-1 relative">
+              <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-black mb-6 tracking-tight text-blue-900">Key Terms Visualization</h3>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl min-h-64 relative overflow-hidden">
+                  <div className="flex flex-wrap justify-center items-center gap-2 relative">
                     {wordFrequency.slice(0, 20).map((word, index) => (
                       <span
                         key={word.text}
-                        className="inline-block px-4 py-2 bg-black text-white rounded-full font-bold shadow-lg hover:bg-gray-800 transition-all duration-300 cursor-pointer transform hover:scale-110"
+                        className="inline-block px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-bold shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 cursor-pointer transform hover:scale-110"
                         style={{
                           fontSize: `${Math.max(16, Math.min(36, word.value * 4 + 12))}px`,
                           fontWeight: word.value > 3 ? '900' : '700',
@@ -186,7 +186,6 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
                       </span>
                     ))}
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"></div>
                 </div>
               </div>
             </div>
