@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Comment, User } from '../types';
 import { analyzeSentiment } from '../utils/sentiment';
 
@@ -26,8 +26,30 @@ interface DataProviderProps {
 }
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [comments, setComments] = useState<Comment[]>(() => {
+    try {
+      const stored = localStorage.getItem('comments');
+      return stored ? JSON.parse(stored) as Comment[] : [];
+    } catch {
+      return [];
+    }
+  });
+  const [users, setUsers] = useState<User[]>(() => {
+    try {
+      const stored = localStorage.getItem('users');
+      return stored ? JSON.parse(stored) as User[] : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('comments', JSON.stringify(comments)); } catch {}
+  }, [comments]);
+
+  useEffect(() => {
+    try { localStorage.setItem('users', JSON.stringify(users)); } catch {}
+  }, [users]);
 
   const addComment = (draftId: number, userEmail: string, content: string) => {
     const newComment: Comment = {

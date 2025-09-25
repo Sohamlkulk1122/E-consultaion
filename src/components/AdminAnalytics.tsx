@@ -6,6 +6,7 @@ import { getSentimentStats, analyzeBulkSentiment } from '../utils/sentiment';
 import { generateWordFrequency } from '../utils/wordCloud';
 import { exportCommentsToCSV } from '../utils/csvExport';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { summarizeTexts } from '../utils/summary';
 
 interface AdminAnalyticsProps {
   draftId: number;
@@ -21,6 +22,8 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
   const sentimentStats = useMemo(() => getSentimentStats(draftComments), [draftComments]);
   const wordFrequency = useMemo(() => generateWordFrequency(draftComments.map(c => c.content)), [draftComments]);
   
+  const summary = useMemo(() => summarizeTexts(draftComments.map(c => c.content)), [draftComments]);
+
   const sentimentData = [
     { name: 'Positive', value: sentimentStats.positive, color: '#10b981' },
     { name: 'Negative', value: sentimentStats.negative, color: '#ef4444' },
@@ -116,7 +119,7 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={(props: any) => `${props.name} ${((props.percent ?? 0) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
@@ -187,6 +190,12 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* Summary */}
+              <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-black mb-3 tracking-tight text-blue-900">Summary</h3>
+                <p className="text-blue-800 leading-relaxed">{summary}</p>
               </div>
             </div>
           )}
