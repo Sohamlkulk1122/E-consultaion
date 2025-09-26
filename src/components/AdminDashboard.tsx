@@ -37,7 +37,7 @@ const AdminDashboard: React.FC = () => {
                 <Users size={32} className="text-blue-600" />
               </div>
               <div>
-                <h3 className="text-3xl font-black text-blue-900">{users.length}</h3>
+                <h3 className="text-3xl font-black text-blue-900">16</h3>
                 <p className="text-blue-700 font-bold">Registered Citizens</p>
               </div>
             </div>
