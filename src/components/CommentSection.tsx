@@ -5,6 +5,7 @@ import { Draft } from '../types';
 import { X, Send, MessageSquare, ThumbsUp, ThumbsDown, Minus, Volume2, Languages, Loader2 } from 'lucide-react';
 import { speakText, stopSpeaking } from '../utils/tts';
 import { translateText, SUPPORTED_LANGS } from '../utils/translate';
+import TranslateModal from './TranslateModal';
 
 interface CommentSectionProps {
 	isOpen: boolean;
@@ -17,6 +18,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 	const [composeLang, setComposeLang] = useState('en');
 	const [composeTranslating, setComposeTranslating] = useState(false);
 	const [composePreview, setComposePreview] = useState('');
+	const [translateModal, setTranslateModal] = useState<{
+		isOpen: boolean;
+		originalText: string;
+		translatedText: string;
+		targetLanguage: string;
+		languageLabel: string;
+	}>({
+		isOpen: false,
+		originalText: '',
+		translatedText: '',
+		targetLanguage: '',
+		languageLabel: ''
+	});
 	const { getCommentsByDraft, addComment } = useData();
 	const { user } = useAuth();
 	
@@ -60,6 +74,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 			setComposePreview(translated);
 		} finally {
 			setComposeTranslating(false);
+		}
+	};
+
+	const handleTranslateComment = async (text: string, targetLang: string) => {
+		try {
+			const translated = await translateText(text, targetLang);
+			const langLabel = SUPPORTED_LANGS.find(l => l.code === targetLang)?.label || targetLang;
+			setTranslateModal({
+				isOpen: true,
+				originalText: text,
+				translatedText: translated,
+				targetLanguage: targetLang,
+				languageLabel: langLabel
+			});
+		} catch (error) {
+			console.error('Translation failed:', error);
 		}
 	};
 
@@ -119,10 +149,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 											Speak
 										</button>
 										<button
-											onClick={async () => {
-												const translated = await translateText(comment.content, composeLang);
-												alert(`Translation (${composeLang}):\n\n${translated}`);
-											}}
+											onClick={() => handleTranslateComment(comment.content, composeLang)}
 											className="inline-flex items-center gap-1 text-sm text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md"
 										>
 											<Languages size={14} />
@@ -187,6 +214,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 					</form>
 				</div>
 			</div>
+			
+			<TranslateModal
+				isOpen={translateModal.isOpen}
+				onClose={() => setTranslateModal(prev => ({ ...prev, isOpen: false }))}
+				originalText={translateModal.originalText}
+				translatedText={translateModal.translatedText}
+				targetLanguage={translateModal.targetLanguage}
+				languageLabel={translateModal.languageLabel}
+			/>
 		</div>
 	);
 };
