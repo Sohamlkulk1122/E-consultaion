@@ -57,15 +57,19 @@ const TranslateModal: React.FC<TranslateModalProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-blue-900">Translation ({languageLabel})</h3>
-              <button
-                onClick={() => speakText(translatedText, targetLanguage)}
-                className="inline-flex items-center gap-1 text-sm text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md transition-colors"
-              >
-                <Volume2 size={14} />
-                Speak
-              </button>
+              {!translatedText.includes('unavailable') && (
+                <button
+                  onClick={() => speakText(translatedText, targetLanguage)}
+                  className="inline-flex items-center gap-1 text-sm text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md transition-colors"
+                >
+                  <Volume2 size={14} />
+                  Speak
+                </button>
+              )}
             </div>
-            <p className="text-blue-800 leading-relaxed font-medium">{translatedText}</p>
+            <p className={`leading-relaxed font-medium ${translatedText.includes('unavailable') ? 'text-red-600' : 'text-blue-800'}`}>
+              {translatedText}
+            </p>
           </div>
         </div>
         

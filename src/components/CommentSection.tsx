@@ -78,6 +78,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 	};
 
 	const handleTranslateComment = async (text: string, targetLang: string) => {
+		if (targetLang === 'en') {
+			// If target is English, just show the original text
+			const langLabel = SUPPORTED_LANGS.find(l => l.code === targetLang)?.label || targetLang;
+			setTranslateModal({
+				isOpen: true,
+				originalText: text,
+				translatedText: text,
+				targetLanguage: targetLang,
+				languageLabel: langLabel
+			});
+			return;
+		}
+		
 		try {
 			const translated = await translateText(text, targetLang);
 			const langLabel = SUPPORTED_LANGS.find(l => l.code === targetLang)?.label || targetLang;
@@ -90,6 +103,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ isOpen, onClose, draft 
 			});
 		} catch (error) {
 			console.error('Translation failed:', error);
+			// Show error in modal
+			const langLabel = SUPPORTED_LANGS.find(l => l.code === targetLang)?.label || targetLang;
+			setTranslateModal({
+				isOpen: true,
+				originalText: text,
+				translatedText: `Translation to ${langLabel} is currently unavailable. Please try again later.`,
+				targetLanguage: targetLang,
+				languageLabel: langLabel
+			});
 		}
 	};
 
