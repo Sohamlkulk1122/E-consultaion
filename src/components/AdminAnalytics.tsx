@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useData } from '../contexts/DataContext';
-import { X, Download, TrendingUp, MessageCircle, BarChart3, Sparkles, Brain, Target, Volume2, Languages, Loader2 } from 'lucide-react';
+import { X, Download, TrendingUp, MessageCircle, BarChart3, Sparkles, Brain, Target, Volume2, Languages, Loader2, Info } from 'lucide-react';
 import { drafts } from '../data/drafts';
 import { getSentimentStats, analyzeBulkSentiment } from '../utils/sentiment';
 import { generateWordFrequency } from '../utils/wordCloud';
 import { exportCommentsToCSV } from '../utils/csvExport';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend } from 'recharts';
 import { summarizeTexts } from '../utils/summary';
 import { speakText } from '../utils/tts';
 import { translateText, SUPPORTED_LANGS } from '../utils/translate';
@@ -31,6 +31,10 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 	const [summaryTranslated, setSummaryTranslated] = useState<string | null>(null);
 	const [summaryTranslatedLang, setSummaryTranslatedLang] = useState<string | null>(null);
 
+	const [hoveredSentiment, setHoveredSentiment] = useState<string | null>(null);
+	const [hoveredWord, setHoveredWord] = useState<string | null>(null);
+	const [hoveredTimePoint, setHoveredTimePoint] = useState<any>(null);
+
 	const sentimentData = [
 		{ name: 'Positive', value: sentimentStats.positive, color: '#06d6a0', gradient: 'from-emerald-400 to-teal-500' },
 		{ name: 'Negative', value: sentimentStats.negative, color: '#f72585', gradient: 'from-pink-500 to-rose-600' },
@@ -53,6 +57,36 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 	const handleExportCSV = () => {
 		if (!draft) return;
 		exportCommentsToCSV(draftComments, draft.title);
+	};
+
+	const CustomTooltip = ({ active, payload, label }: any) => {
+		if (active && payload && payload.length) {
+			return (
+				<div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-2xl border border-blue-200">
+					<p className="font-bold text-blue-900 mb-2">{`${label}`}</p>
+					{payload.map((entry: any, index: number) => (
+						<p key={index} className="text-sm" style={{ color: entry.color }}>
+							{`${entry.name}: ${entry.value}`}
+						</p>
+					))}
+				</div>
+			);
+		}
+		return null;
+	};
+
+	const PieTooltip = ({ active, payload }: any) => {
+		if (active && payload && payload.length) {
+			const data = payload[0];
+			return (
+				<div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-2xl border border-blue-200">
+					<p className="font-bold text-blue-900">{data.name}</p>
+					<p className="text-sm text-blue-700">{`Count: ${data.value}`}</p>
+					<p className="text-sm text-blue-700">{`Percentage: ${((data.value / draftComments.length) * 100).toFixed(1)}%`}</p>
+				</div>
+			);
+		}
+		return null;
 	};
 
 	if (!draft) return null;
@@ -86,33 +120,49 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 						<div className="space-y-8">
 							{/* Summary Stats */}
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-								<div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg border border-blue-200">
+								<div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg border border-blue-200 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group">
 									<div className="flex items-center gap-2 mb-2">
-										<MessageCircle size={20} className="text-blue-600" />
+										<MessageCircle size={20} className="text-blue-600 group-hover:scale-110 transition-transform duration-300" />
 										<span className="font-bold text-blue-900">Total Responses</span>
+										<Info size={14} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 									</div>
-									<p className="text-3xl font-black text-blue-900">{draftComments.length}</p>
+									<p className="text-3xl font-black text-blue-900 group-hover:text-blue-700 transition-colors duration-300">{draftComments.length}</p>
+									<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2">
+										<p className="text-xs text-blue-600">Click to view all responses</p>
+									</div>
 								</div>
-								<div className="bg-gradient-to-br from-emerald-50 to-teal-100 p-6 rounded-2xl shadow-lg border border-emerald-200">
+								<div className="bg-gradient-to-br from-emerald-50 to-teal-100 p-6 rounded-2xl shadow-lg border border-emerald-200 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group">
 									<div className="flex items-center gap-2 mb-2">
-										<TrendingUp size={20} className="text-emerald-600" />
+										<TrendingUp size={20} className="text-emerald-600 group-hover:scale-110 transition-transform duration-300" />
 										<span className="font-bold text-emerald-900">Positive</span>
+										<Info size={14} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 									</div>
-									<p className="text-3xl font-black text-emerald-700">{sentimentStats.positive}</p>
+									<p className="text-3xl font-black text-emerald-700 group-hover:text-emerald-600 transition-colors duration-300">{sentimentStats.positive}</p>
+									<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2">
+										<p className="text-xs text-emerald-600">{sentimentStats.positive > 0 ? `${((sentimentStats.positive / draftComments.length) * 100).toFixed(1)}% of total` : 'No positive feedback yet'}</p>
+									</div>
 								</div>
-								<div className="bg-gradient-to-br from-pink-50 to-rose-100 p-6 rounded-2xl shadow-lg border border-pink-200">
+								<div className="bg-gradient-to-br from-pink-50 to-rose-100 p-6 rounded-2xl shadow-lg border border-pink-200 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group">
 									<div className="flex items-center gap-2 mb-2">
-										<BarChart3 size={20} className="text-pink-600" />
+										<BarChart3 size={20} className="text-pink-600 group-hover:scale-110 transition-transform duration-300" />
 										<span className="font-bold text-pink-900">Negative</span>
+										<Info size={14} className="text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 									</div>
-									<p className="text-3xl font-black text-pink-700">{sentimentStats.negative}</p>
+									<p className="text-3xl font-black text-pink-700 group-hover:text-pink-600 transition-colors duration-300">{sentimentStats.negative}</p>
+									<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2">
+										<p className="text-xs text-pink-600">{sentimentStats.negative > 0 ? `${((sentimentStats.negative / draftComments.length) * 100).toFixed(1)}% of total` : 'No negative feedback yet'}</p>
+									</div>
 								</div>
-								<div className="bg-gradient-to-br from-indigo-50 to-purple-100 p-6 rounded-2xl shadow-lg border border-indigo-200">
+								<div className="bg-gradient-to-br from-indigo-50 to-purple-100 p-6 rounded-2xl shadow-lg border border-indigo-200 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group">
 									<div className="flex items-center gap-2 mb-2">
-										<Target size={20} className="text-indigo-600" />
+										<Target size={20} className="text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
 										<span className="font-bold text-indigo-900">Neutral</span>
+										<Info size={14} className="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 									</div>
-									<p className="text-3xl font-black text-indigo-700">{sentimentStats.neutral}</p>
+									<p className="text-3xl font-black text-indigo-700 group-hover:text-indigo-600 transition-colors duration-300">{sentimentStats.neutral}</p>
+									<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2">
+										<p className="text-xs text-indigo-600">{sentimentStats.neutral > 0 ? `${((sentimentStats.neutral / draftComments.length) * 100).toFixed(1)}% of total` : 'No neutral feedback yet'}</p>
+									</div>
 								</div>
 							</div>
 
@@ -132,7 +182,10 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 									<div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50">
 										<div className="h-80">
 										<ResponsiveContainer width="100%" height="100%">
-											<PieChart>
+											<PieChart
+												onMouseEnter={() => setHoveredSentiment('chart')}
+												onMouseLeave={() => setHoveredSentiment(null)}
+											>
 												<Pie
 													data={sentimentData}
 													cx="50%"
@@ -144,26 +197,43 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 													fill="#8884d8"
 													dataKey="value"
 													stroke="none"
+													onMouseEnter={(data, index) => setHoveredSentiment(data.name)}
+													onMouseLeave={() => setHoveredSentiment(null)}
 												>
 													{sentimentData.map((entry, index) => (
-														<Cell key={`cell-${index}`} fill={entry.color} />
+														<Cell 
+															key={`cell-${index}`} 
+															fill={entry.color}
+															stroke={hoveredSentiment === entry.name ? '#ffffff' : 'none'}
+															strokeWidth={hoveredSentiment === entry.name ? 3 : 0}
+															style={{
+																filter: hoveredSentiment === entry.name ? 'brightness(1.1)' : 'none',
+																transform: hoveredSentiment === entry.name ? 'scale(1.05)' : 'scale(1)',
+																transformOrigin: 'center',
+																transition: 'all 0.3s ease'
+															}}
+														/>
 													))}
 												</Pie>
-												<Tooltip 
-													contentStyle={{
-														backgroundColor: 'rgba(255, 255, 255, 0.95)',
-														border: 'none',
-														borderRadius: '12px',
-														boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-														backdropFilter: 'blur(10px)'
-													}}
+												<Tooltip content={<PieTooltip />} />
+												<Legend 
+													wrapperStyle={{ paddingTop: '20px' }}
+													iconType="circle"
 												/>
 											</PieChart>
 										</ResponsiveContainer>
 										</div>
 										<div className="grid grid-cols-3 gap-4 mt-6">
 											{sentimentData.map((item, index) => (
-												<div key={index} className={`bg-gradient-to-r ${item.gradient} p-4 rounded-xl text-white text-center shadow-lg transform hover:scale-105 transition-all duration-300`}>
+												<div 
+													key={index} 
+													className={`bg-gradient-to-r ${item.gradient} p-4 rounded-xl text-white text-center shadow-lg transform hover:scale-110 hover:shadow-2xl transition-all duration-300 cursor-pointer group`}
+													onMouseEnter={() => setHoveredSentiment(item.name)}
+													onMouseLeave={() => setHoveredSentiment(null)}
+												>
+													<div className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-1">
+														{item.value > 0 ? `${((item.value / draftComments.length) * 100).toFixed(1)}%` : '0%'}
+													</div>
 													<div className="text-2xl font-black">{item.value}</div>
 													<div className="text-sm font-medium opacity-90">{item.name}</div>
 												</div>
@@ -189,11 +259,20 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 									<div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50">
 										<div className="h-80">
 										<ResponsiveContainer width="100%" height="100%">
-											<BarChart data={wordFrequency.slice(0, 10)} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+											<BarChart 
+												data={wordFrequency.slice(0, 10)} 
+												margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+												onMouseEnter={() => setHoveredWord('chart')}
+												onMouseLeave={() => setHoveredWord(null)}
+											>
 												<defs>
 													<linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
 														<stop offset="0%" stopColor="#06d6a0" />
 														<stop offset="100%" stopColor="#0891b2" />
+													</linearGradient>
+													<linearGradient id="barGradientHover" x1="0" y1="0" x2="0" y2="1">
+														<stop offset="0%" stopColor="#00c896" />
+														<stop offset="100%" stopColor="#0ea5e9" />
 													</linearGradient>
 												</defs>
 												<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.5} />
@@ -205,20 +284,17 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 													tick={{ fontSize: 12, fill: '#475569' }}
 												/>
 												<YAxis tick={{ fontSize: 12, fill: '#475569' }} />
-												<Tooltip 
-													contentStyle={{
-														backgroundColor: 'rgba(255, 255, 255, 0.95)',
-														border: 'none',
-														borderRadius: '12px',
-														boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-														backdropFilter: 'blur(10px)'
-													}}
-												/>
+												<Tooltip content={<CustomTooltip />} />
 												<Bar 
 													dataKey="value" 
-													fill="url(#barGradient)"
+													fill={hoveredWord ? "url(#barGradientHover)" : "url(#barGradient)"}
 													radius={[8, 8, 0, 0]}
 													stroke="none"
+													onMouseEnter={(data) => setHoveredWord(data.text)}
+													onMouseLeave={() => setHoveredWord(null)}
+													style={{
+														transition: 'all 0.3s ease'
+													}}
 												/>
 											</BarChart>
 										</ResponsiveContainer>
@@ -243,32 +319,49 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 										<div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50">
 											<div className="h-80">
 											<ResponsiveContainer width="100%" height="100%">
-												<LineChart data={trendsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+												<LineChart 
+													data={trendsData} 
+													margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+													onMouseEnter={() => setHoveredTimePoint('chart')}
+													onMouseLeave={() => setHoveredTimePoint(null)}
+												>
 													<defs>
 														<linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
 															<stop offset="0%" stopColor="#8b5cf6" />
 															<stop offset="100%" stopColor="#ec4899" />
 														</linearGradient>
+														<linearGradient id="lineGradientHover" x1="0" y1="0" x2="1" y2="0">
+															<stop offset="0%" stopColor="#a855f7" />
+															<stop offset="100%" stopColor="#f472b6" />
+														</linearGradient>
 													</defs>
 													<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.5} />
 													<XAxis dataKey="date" tick={{ fontSize: 12, fill: '#475569' }} />
 													<YAxis tick={{ fontSize: 12, fill: '#475569' }} />
-													<Tooltip 
-														contentStyle={{
-															backgroundColor: 'rgba(255, 255, 255, 0.95)',
-															border: 'none',
-															borderRadius: '12px',
-															boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-															backdropFilter: 'blur(10px)'
-														}}
-													/>
+													<Tooltip content={<CustomTooltip />} />
 													<Line 
 														type="monotone" 
 														dataKey="comments" 
-														stroke="url(#lineGradient)" 
-														strokeWidth={4}
-														dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 6 }}
-														activeDot={{ r: 8, fill: '#ec4899' }}
+														stroke={hoveredTimePoint ? "url(#lineGradientHover)" : "url(#lineGradient)"} 
+														strokeWidth={hoveredTimePoint ? 5 : 4}
+														dot={{ 
+															fill: '#8b5cf6', 
+															strokeWidth: 2, 
+															r: hoveredTimePoint ? 8 : 6,
+															style: { transition: 'all 0.3s ease' }
+														}}
+														activeDot={{ 
+															r: 10, 
+															fill: '#ec4899',
+															stroke: '#ffffff',
+															strokeWidth: 3,
+															style: { 
+																filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))',
+																transition: 'all 0.3s ease'
+															}
+														}}
+														onMouseEnter={(data) => setHoveredTimePoint(data)}
+														onMouseLeave={() => setHoveredTimePoint(null)}
 													/>
 												</LineChart>
 											</ResponsiveContainer>
@@ -296,6 +389,8 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 										{wordFrequency.slice(0, 20).map((word, index) => (
 											<span
 												key={word.text}
+												onMouseEnter={() => setHoveredWord(word.text)}
+												onMouseLeave={() => setHoveredWord(null)}
 												className={`inline-block px-6 py-3 text-white rounded-full font-bold shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-110 ${
 													index % 6 === 0 ? 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600' :
 													index % 6 === 1 ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' :
@@ -314,6 +409,11 @@ const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ draftId, onClose }) => 
 												}}
 											>
 												{word.text}
+												{hoveredWord === word.text && (
+													<span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+														Mentioned {word.value} times
+													</span>
+												)}
 											</span>
 										))}
 									</div>
