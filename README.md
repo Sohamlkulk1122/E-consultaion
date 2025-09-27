@@ -40,3 +40,6 @@ npm run preview -- --host --port 5173
 ## Notes
 - Supabase auth requires valid `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Without them, auth features will not work.
 - This project uses TailwindCSS; styles are in `src/index.css` and `tailwind.config.js`.
+
+##Backend
+-BAckend Files are compressed together in a zip file named as Backend.zip in main branch.
